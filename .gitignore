@@ -27,3 +27,11 @@
 *.exe
 *.out
 *.app
+
+*.ilk
+*.pdb
+*.sdf
+*.opensdf
+*.suo
+tt/
+Debug/
