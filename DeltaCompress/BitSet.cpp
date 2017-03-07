@@ -52,7 +52,8 @@ size_t CBitSet::getBits(size_t index, size_t sz, size_t defVal) const
 #endif
 	size_t ret = 0;
 
-	for (size_t i = 0; i < sz; i++)
+	//for (size_t i = 0; i < sz; i++)
+	for (unsigned int i = m_szElement - sz; i >= 0; --i)
 	{
 		ret = ret << 1;
 		ret |= getBit(index + 1, defVal);
@@ -93,13 +94,16 @@ void CBitSet::setBits(size_t index, size_t val, size_t sz)
 	size_t iOffset = index % m_szElement;
 	size_t iOffsetRev = m_szElement - iOffset - 1;
 
-	if (val)
-		m_lstArea[iArrPos] = m_lstArea[iArrPos] | (m_one << iOffsetRev);
-	else
+	for (unsigned int i = m_szElement - sz; i >= 0; --i)
 	{
-		size_t offVal = m_one << iOffsetRev;
-		offVal = ~offVal;
-		m_lstArea[iArrPos] = m_lstArea[iArrPos] & offVal;
+		if (val & (m_one << i))
+			m_lstArea[iArrPos] = m_lstArea[iArrPos] | (m_one << iOffsetRev);
+		else
+		{
+			size_t offVal = m_one << iOffsetRev;
+			offVal = ~offVal;
+			m_lstArea[iArrPos] = m_lstArea[iArrPos] & offVal;
+		}
 	}
 }
 

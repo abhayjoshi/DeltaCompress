@@ -10,6 +10,7 @@
 #include <fstream>
 #include <iomanip>
 #include <list>
+#include "BitSet.h"
 
 using namespace std;
 
@@ -199,5 +200,8 @@ void Test3_Short()
 
 	f.close();
 
+	CBitSet stream1, stream2;
+	size_t sz = n * 32;
+	stream1.setSize(sz);
 
 }
