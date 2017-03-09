@@ -15,7 +15,7 @@ const size_t CBitSet::m_mask = ~((size_t) 0);
 
 
 CBitSet::CBitSet(void)
-	:m_uiLength(0)
+	:m_uiLength(0),m_uiLast(0)
 {
 }
 
@@ -69,6 +69,7 @@ void CBitSet::setBit(size_t index, unsigned char val)
 		return;
 #endif
 
+	m_uiLast = max(m_uiLast, index);
 	size_t iArrPos = index / m_szElement;
 	size_t iOffset = index % m_szElement;
 	size_t iOffsetRev = m_szElement - iOffset - 1;
@@ -90,6 +91,7 @@ void CBitSet::setBits(size_t index, size_t val, size_t sz)
 		return;
 #endif
 
+	m_uiLast = max(m_uiLast, index + sz - 1);
 	size_t iArrPos = index / m_szElement;
 	size_t iOffset = index % m_szElement;
 	size_t iOffsetRev = m_szElement - iOffset - 1;
@@ -104,6 +106,9 @@ void CBitSet::setBits(size_t index, size_t val, size_t sz)
 			offVal = ~offVal;
 			m_lstArea[iArrPos] = m_lstArea[iArrPos] & offVal;
 		}
+
+		if (i == 0)
+			break;
 	}
 }
 
@@ -113,7 +118,7 @@ void CBitSet::setBit(size_t stIndex, size_t edIndex, unsigned char val)
 	if (stIndex > edIndex || stIndex < 0 || edIndex >= m_uiLength)
 		return;
 #endif
-
+	m_uiLast = max(m_uiLast, edIndex);
 	size_t idiff = edIndex - stIndex;
 	size_t iArrPos = stIndex / m_szElement;
 	size_t iOffset = stIndex % m_szElement;
@@ -156,4 +161,9 @@ void CBitSet::setBit(size_t stIndex, size_t edIndex, unsigned char val)
 			idiff = 0;
 		}
 	} while (idiff > 0);
+}
+
+void CBitSet::pushBits(size_t val, size_t sz)
+{
+	setBits(m_uiLast + 1, val, sz);
 }

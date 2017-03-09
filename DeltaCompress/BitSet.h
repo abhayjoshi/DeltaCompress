@@ -42,7 +42,7 @@ public:
 		\param sz size.
 		\param defVal default return value if bit not present
 	*/
-	size_t CBitSet::getBits(size_t index, size_t sz, size_t defVal) const;
+	size_t CBitSet::getBits(size_t index, size_t sz, size_t defVal = 0) const;
 
 	//! \fn setBit sets bit of array.
 	/*! sets bit of array.
@@ -55,6 +55,7 @@ public:
 	/*! sets bit of array.
 		\param index in array.
 		\param val value to set.
+		\param sz size of value.
 	*/
 	void setBits(size_t index, size_t val = 1, size_t sz = 1);
 
@@ -66,15 +67,28 @@ public:
 	*/
 	void setBit(size_t stIndex, size_t edIndex, unsigned char val = 1);
 
+	//! \fn pushBits push bit of array.
+	/*! sets bit of array.
+		\param val value to set.
+		\param sz size of value.
+	*/
+	void pushBits(size_t val = 1, size_t sz = 1);
+
 	//! \fn getLength returns array size.
 	/*! returns array size.
 	*/
 	inline size_t getSize() const { return m_uiLength;}
 
+	//! \fn getLast returns array size.
+	/*! returns array last index modified.
+	*/
+	inline size_t getLast() const { return m_uiLast;}
+
 private:
 
 	vector<size_t> m_lstArea;
 	size_t m_uiLength;
+	size_t m_uiLast;
 
 	static const unsigned char m_szElement;
 	static const size_t m_one;

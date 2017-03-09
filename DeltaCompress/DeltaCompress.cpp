@@ -62,7 +62,7 @@ void Test1_Int()
 
 	for (; i < n; i++)
 	{
-		indices[i] = b1.addItem(*(unsigned int*) ((void*) &(data[i]));
+		indices[i] = b1.addItem(*(unsigned int*) ((void*) &(data[i])));
 	}
 
 	i = b1.binData.size() - 1;
@@ -111,7 +111,7 @@ void Test2_Int_Span()
 
 	for (; i < n; i++)
 	{
-		indices[i] = b1Span.addItemSpanning(*(unsigned int*) ((void*) &(data[i]));
+		indices[i] = b1Span.addItemSpanning(*(unsigned int*) ((void*) &(data[i])));
 	}
 
 	i = b1Span.binData.size() - 1;
@@ -202,6 +202,90 @@ void Test3_Short()
 
 	CBitSet stream1, stream2;
 	size_t sz = n * 32;
+	const size_t intsz = sizeof(n) * 8;
+	const size_t binsz = sizeof(short) * 8;
 	stream1.setSize(sz);
+	stream2.setSize(sz);
+	stream1.setBits(stream1.getLast() + 1, n, intsz);
+	stream2.setBits(stream2.getLast() + 1, n, intsz);
+
+	stream1.setBits(stream1.getLast() + 1, 0, intsz); // no of headers, init 0
+	stream1.setBits(stream1.getLast() + 1, 0, 1); // header method 0
+	stream1.setBits(stream1.getLast() + 1, 0, 1); // header bits method 0
+	stream1.setBits(stream1.getLast() + 1, 0, 6); // header bits
+	
+	// Compute used headers
+	size_t nHeaders = 0;
+	vector<unsigned int> found(n, 0);
+	
+	CBitSet tmp;
+	tmp.setSize(b2.binData.size());
+
+	for (i = 0; i < n - 1; ++i)
+	{
+		if (tmp.getBit(indices[i]))
+			continue;
+		/*
+		if (found[i] == 1)
+			continue;
+
+		for (size_t j = i + 1; j < n; ++j)
+		{
+			if (indices[i] == indices[j])
+			{
+				indices[j] = nHeaders;
+				found[j] = 1;
+			}
+		}
+		*/
+		mask1 = 0;
+
+		unsigned int pos = indices[i];
+		stringstream s1, s2;
+
+		if (b2.binData[pos].val > 0)
+			mask1 |= 1 << b2.binData[pos].lvl;
+
+		while (pos > 0)
+		{
+			pos = b2.binData[pos].up;
+
+			if (b2.binData[pos].val > 0)
+				mask1 |= 1 << b2.binData[pos].lvl;
+		}
+
+		tmp.setBit(indices[i]);
+		indices[i] = nHeaders++;
+		//stream1.setBits(stream1.getLast() + 1, 15, 5);
+		stream1.setBits(stream1.getLast() + 1, mask1, binsz);
+	}
+
+	stream1.setBits(32, nHeaders, intsz); // no of headers
+	
+	size_t szHeaders = 0;
+
+	while (nHeaders)
+	{
+		szHeaders++;
+		nHeaders >>= 1;
+	}
+
+	for (i = 0; i < n - 1; ++i)
+	{
+		stream1.setBits(stream1.getLast() + 1, indices[i], szHeaders);
+	}
+
+	float *op1 = 0;
+	size_t iRead = 0;
+	size_t iVal = 0;
+	
+#define READ(s, b) s.getBits(iRead, b); iRead += b
+
+	iVal = READ(stream1, 32);
+	size_t numItems = iVal;
+	iVal = READ(stream1, 32);
+	size_t numHeaders = iVal;
+
+	op1=new float[numItems];
 
 }
