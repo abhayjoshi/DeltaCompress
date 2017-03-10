@@ -206,13 +206,14 @@ void Test3_Short()
 	const size_t binsz = sizeof(short) * 8;
 	stream1.setSize(sz);
 	stream2.setSize(sz);
-	stream1.setBits(stream1.getLast() + 1, n, intsz);
-	stream2.setBits(stream2.getLast() + 1, n, intsz);
+	stream1.setBits(stream1.getLast(), n, intsz);
+	stream2.setBits(stream2.getLast(), n, intsz);
 
-	stream1.setBits(stream1.getLast() + 1, 0, intsz); // no of headers, init 0
-	stream1.setBits(stream1.getLast() + 1, 0, 1); // header method 0
-	stream1.setBits(stream1.getLast() + 1, 0, 1); // header bits method 0
-	stream1.setBits(stream1.getLast() + 1, 0, 6); // header bits
+	stream1.setBits(stream1.getLast(), 0, intsz); // no of headers, init 0
+	stream1.setBits(stream1.getLast(), 0, 1); // header method 0, Used headers || 1  Binary headers
+	stream1.setBits(stream1.getLast(), 0, 1); // header bits method 0, same bits, don't read bits each header, next field for  header size
+																 // 1, read each header bits next field for no of header size bits
+	stream1.setBits(stream1.getLast(), 15, 6); // header bits
 	
 	// Compute used headers
 	size_t nHeaders = 0;
@@ -220,6 +221,8 @@ void Test3_Short()
 	
 	CBitSet tmp;
 	tmp.setSize(b2.binData.size());
+	vector<unsigned short> aHeaderst(5000,0);
+	size_t t = 0;
 
 	for (i = 0; i < n - 1; ++i)
 	{
@@ -256,8 +259,9 @@ void Test3_Short()
 
 		tmp.setBit(indices[i]);
 		indices[i] = nHeaders++;
-		//stream1.setBits(stream1.getLast() + 1, 15, 5);
-		stream1.setBits(stream1.getLast() + 1, mask1, binsz);
+		//stream1.setBits(stream1.getLast(), 15, 5);
+		stream1.setBits(stream1.getLast(), mask1, binsz);
+		aHeaderst[t++] = mask1;
 	}
 
 	stream1.setBits(32, nHeaders, intsz); // no of headers
@@ -272,7 +276,7 @@ void Test3_Short()
 
 	for (i = 0; i < n - 1; ++i)
 	{
-		stream1.setBits(stream1.getLast() + 1, indices[i], szHeaders);
+		stream1.setBits(stream1.getLast(), indices[i], szHeaders);
 	}
 
 	float *op1 = 0;
@@ -286,6 +290,46 @@ void Test3_Short()
 	iVal = READ(stream1, 32);
 	size_t numHeaders = iVal;
 
-	op1=new float[numItems];
+	op1 = new float[numItems];
 
+	// header method 0
+	iVal = READ(stream1, 1);
+
+	if (iVal != 0)
+		return;
+	
+	// header bits method
+	iVal = READ(stream1, 1);
+
+	if (iVal != 0)
+		return;
+
+	unsigned char hSize = READ(stream1, 6);
+	hSize++;
+	vector<unsigned short> aHeaders(numHeaders,0);
+
+	for (i = 0; i < numHeaders; ++i)
+	{
+		aHeaders[i] = READ(stream1, hSize);
+	}
+
+	szHeaders = 0;
+
+	while (numHeaders)
+	{
+		szHeaders++;
+		numHeaders >>= 1;
+	}
+	//return;
+	for (i = 0; i < numItems; ++i)
+	{
+		iVal = READ(stream1, szHeaders);
+		op1[i] = *((float*) ((void *) &aHeaders[iVal]));
+	}
+
+	for (i = 0; i < numItems; ++i)
+	{
+		if (op1[i] != data[i])
+			int failed = 1;
+	}
 }

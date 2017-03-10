@@ -47,16 +47,16 @@ unsigned char CBitSet::getBit(size_t index, unsigned char defVal) const
 size_t CBitSet::getBits(size_t index, size_t sz, size_t defVal) const
 {
 #ifdef _DEBUG
-	if (sz > 0 ||index < 0 || index + (sz - 1) >= m_uiLength)
+	if (sz < 0 ||index < 0 || index + sz > m_uiLength)
 		return defVal;
 #endif
 	size_t ret = 0;
 
 	//for (size_t i = 0; i < sz; i++)
-	for (unsigned int i = m_szElement - sz; i >= 0; --i)
+	for (unsigned int i = sz; i > 0; --i)
 	{
 		ret = ret << 1;
-		ret |= getBit(index + 1, defVal);
+		ret |= getBit(index++, defVal);
 	}
 
 	return ret;
@@ -69,7 +69,7 @@ void CBitSet::setBit(size_t index, unsigned char val)
 		return;
 #endif
 
-	m_uiLast = max(m_uiLast, index);
+	m_uiLast = max(m_uiLast, index + 1);
 	size_t iArrPos = index / m_szElement;
 	size_t iOffset = index % m_szElement;
 	size_t iOffsetRev = m_szElement - iOffset - 1;
@@ -91,24 +91,9 @@ void CBitSet::setBits(size_t index, size_t val, size_t sz)
 		return;
 #endif
 
-	m_uiLast = max(m_uiLast, index + sz - 1);
-	size_t iArrPos = index / m_szElement;
-	size_t iOffset = index % m_szElement;
-	size_t iOffsetRev = m_szElement - iOffset - 1;
-
-	for (unsigned int i = m_szElement - sz; i >= 0; --i)
+	for (unsigned int i = sz; i > 0; --i)
 	{
-		if (val & (m_one << i))
-			m_lstArea[iArrPos] = m_lstArea[iArrPos] | (m_one << iOffsetRev);
-		else
-		{
-			size_t offVal = m_one << iOffsetRev;
-			offVal = ~offVal;
-			m_lstArea[iArrPos] = m_lstArea[iArrPos] & offVal;
-		}
-
-		if (i == 0)
-			break;
+		setBit(index++, (unsigned char) ((val & (m_one << (i - 1))) > 0 ? 1 : 0));
 	}
 }
 
@@ -118,7 +103,7 @@ void CBitSet::setBit(size_t stIndex, size_t edIndex, unsigned char val)
 	if (stIndex > edIndex || stIndex < 0 || edIndex >= m_uiLength)
 		return;
 #endif
-	m_uiLast = max(m_uiLast, edIndex);
+	m_uiLast = max(m_uiLast, edIndex + 1);
 	size_t idiff = edIndex - stIndex;
 	size_t iArrPos = stIndex / m_szElement;
 	size_t iOffset = stIndex % m_szElement;
@@ -165,5 +150,5 @@ void CBitSet::setBit(size_t stIndex, size_t edIndex, unsigned char val)
 
 void CBitSet::pushBits(size_t val, size_t sz)
 {
-	setBits(m_uiLast + 1, val, sz);
+	setBits(m_uiLast, val, sz);
 }
