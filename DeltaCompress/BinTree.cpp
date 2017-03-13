@@ -286,14 +286,14 @@ unsigned short BinTree::getMask(const unsigned int &i) const
 	stringstream s1, s2;
 
 	if (binData[pos].val > 0)
-		mask |= 1 << binData[pos].lvl;
+		mask |= 1 << (depth - binData[pos].lvl - 1);
 
 	while (pos > 0)
 	{
 		pos = binData[pos].up;
 
 		if (binData[pos].val > 0)
-			mask |= 1 << binData[pos].lvl;
+			mask |= 1 << (depth - binData[pos].lvl - 1);
 	}
 
 	return mask;
@@ -311,10 +311,10 @@ unsigned int BinTree::addItem(const unsigned short &item)
 	else
 		iRet = addInTree(item, 0, mask >> 1);
 
-	//unsigned short msk = getMask(iRet);
+	unsigned short msk = getMask(iRet);
 
-	//if (msk != item)
-	//	int failed = 0;
+	if (msk != item)
+		int failed = 0;
 
 	return iRet;
 }

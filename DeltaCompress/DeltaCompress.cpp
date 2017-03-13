@@ -209,7 +209,7 @@ void Test3_Short()
 	vector<unsigned short> aHeaderst(5000,0);
 	size_t t = 0;
 
-	for (i = 0; i < n - 1; ++i)
+	for (i = 0; i < n; ++i)
 	{
 		if (tmp.getBit(indices[i]))
 		{
@@ -229,21 +229,21 @@ void Test3_Short()
 			}
 		}
 		*/
-		mask1 = 0;
+		mask1 = b2.getMask(indices[i]);
 
-		unsigned int pos = indices[i];
-		stringstream s1, s2;
+		//unsigned int pos = indices[i];
+		//stringstream s1, s2;
 
-		if (b2.binData[pos].val > 0)
-			mask1 |= 1 << b2.binData[pos].lvl;
+		//if (b2.binData[pos].val > 0)
+		//	mask1 |= 1 << b2.binData[pos].lvl;
 
-		while (pos > 0)
-		{
-			pos = b2.binData[pos].up;
+		//while (pos > 0)
+		//{
+		//	pos = b2.binData[pos].up;
 
-			if (b2.binData[pos].val > 0)
-				mask1 |= 1 << b2.binData[pos].lvl;
-		}
+		//	if (b2.binData[pos].val > 0)
+		//		mask1 |= 1 << b2.binData[pos].lvl;
+		//}
 
 		tmp.setBit(indices[i]);
 		indicesNew[indices[i]] = nHeaders;
@@ -263,7 +263,7 @@ void Test3_Short()
 		nHeaders >>= 1;
 	}
 
-	for (i = 0; i < n - 1; ++i)
+	for (i = 0; i < n; ++i)
 	{
 		stream1.setBits(stream1.getLast(), indices[i], szHeaders);
 	}
@@ -317,7 +317,9 @@ void Test3_Short()
 		op1stream[i] = aHeaders[iVal];
 	}
 
-	for (i = 0; i < numItems; ++i)
+	// Testing
+
+	for (i = 0; i < numItems / 2; ++i)
 	{
 		if (op1[i] != data[i])
 			int failed = 1;
