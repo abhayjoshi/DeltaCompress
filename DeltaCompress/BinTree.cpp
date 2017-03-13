@@ -279,6 +279,26 @@ unsigned int BinTree::addInTree(const unsigned short &item, const unsigned int &
 	return iRet;
 }
 
+unsigned short BinTree::getMask(const unsigned int &i) const
+{
+	unsigned short mask = 0;
+	unsigned int pos = i;
+	stringstream s1, s2;
+
+	if (binData[pos].val > 0)
+		mask |= 1 << binData[pos].lvl;
+
+	while (pos > 0)
+	{
+		pos = binData[pos].up;
+
+		if (binData[pos].val > 0)
+			mask |= 1 << binData[pos].lvl;
+	}
+
+	return mask;
+}
+
 unsigned int BinTree::addItem(const unsigned short &item)
 {
 	unsigned short mask = 0x8000;
@@ -287,9 +307,14 @@ unsigned int BinTree::addItem(const unsigned short &item)
 	//cout << ToString(mask) << endl;
 
 	if (mask & item)
-		iRet = addInTree(item, 0, mask >> 1);
-	else
 		iRet = addInTree(item, 1, mask >> 1);
+	else
+		iRet = addInTree(item, 0, mask >> 1);
+
+	//unsigned short msk = getMask(iRet);
+
+	//if (msk != item)
+	//	int failed = 0;
 
 	return iRet;
 }

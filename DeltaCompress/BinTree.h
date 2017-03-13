@@ -44,6 +44,7 @@ public:
 	unsigned int addItem(const unsigned short &item);
 	string ToString(const unsigned int &val, unsigned int mask = 0x80000000);
 	string ToString(const unsigned short &val, unsigned short mask = 0x8000);
+	unsigned short getMask(const unsigned int &i) const;
 
 private:
 	unsigned int depth;

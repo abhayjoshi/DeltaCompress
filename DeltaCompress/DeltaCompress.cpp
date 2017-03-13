@@ -152,7 +152,7 @@ void Test2_Int_Span()
 
 void Test3_Short()
 {
-	unsigned int n = sizeof(data)/sizeof(data[0]);
+	unsigned int n = sizeof(data)/sizeof(unsigned short);
 	vector<unsigned int> indices(n, 0);
 	BinTree b2;
 
@@ -160,46 +160,30 @@ void Test3_Short()
 		return ;
 
 	unsigned int i = 0;
+	unsigned short *in_stream = (unsigned short*) ((void *) data);
 
 	for (; i < n; i++)
 	{
-		indices[i] = b2.addItem(*(unsigned short*) ((void*) &(data[i])));
+		indices[i] = b2.addItem(in_stream[i]);
 	}
 
 	i = b2.binData.size() - 1;
-	unsigned int cnt = 0;
 	unsigned short mask1 = 0;
 	list<binHead16> hd1;
-
+	/*
 	ofstream f("test16.txt", ofstream::out);
 
 	do
 	{
 		if (b2.binData[i].cnt > 0)
 		{
-			cnt++;
-			mask1 = 0;
-
-			unsigned int pos = i;
-			stringstream s1, s2;
-
-			if (b2.binData[pos].val > 0)
-				mask1 |= 1 << b2.binData[pos].lvl;
-
-			while (pos > 0)
-			{
-				pos = b2.binData[pos].up;
-
-				if (b2.binData[pos].val > 0)
-					mask1 |= 1 << b2.binData[pos].lvl;
-			}
-
+			mask1 = b2.getMask(i);
 			f << b2.ToString(mask1, 1 << b2.binData[i].lvl) << " - " << b2.binData[i].cnt << endl;
 		}
 	} while (i-- > 0);
 
 	f.close();
-
+	*/
 	CBitSet stream1, stream2;
 	size_t sz = n * 32;
 	const size_t intsz = sizeof(n) * 8;
@@ -221,13 +205,17 @@ void Test3_Short()
 	
 	CBitSet tmp;
 	tmp.setSize(b2.binData.size());
+	vector<unsigned int> indicesNew(b2.binData.size(), 0);
 	vector<unsigned short> aHeaderst(5000,0);
 	size_t t = 0;
 
 	for (i = 0; i < n - 1; ++i)
 	{
 		if (tmp.getBit(indices[i]))
+		{
+			indices[i] = indicesNew[indices[i]];
 			continue;
+		}
 		/*
 		if (found[i] == 1)
 			continue;
@@ -258,6 +246,7 @@ void Test3_Short()
 		}
 
 		tmp.setBit(indices[i]);
+		indicesNew[indices[i]] = nHeaders;
 		indices[i] = nHeaders++;
 		//stream1.setBits(stream1.getLast(), 15, 5);
 		stream1.setBits(stream1.getLast(), mask1, binsz);
@@ -321,10 +310,11 @@ void Test3_Short()
 		numHeaders >>= 1;
 	}
 	//return;
+	unsigned short *op1stream = (unsigned short*) ((void *) op1);
 	for (i = 0; i < numItems; ++i)
 	{
 		iVal = READ(stream1, szHeaders);
-		op1[i] = *((float*) ((void *) &aHeaders[iVal]));
+		op1stream[i] = aHeaders[iVal];
 	}
 
 	for (i = 0; i < numItems; ++i)
